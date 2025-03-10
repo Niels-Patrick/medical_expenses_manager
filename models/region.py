@@ -12,7 +12,11 @@ class Region(Base):
     id_region = Column(Integer, primary_key=True)
     region_name = Column(String(50), nullable=False)
 
-    patient = relationship("Patient", back_populates="region")
+    # Lazy import to avoid circular import
+    @property
+    def patients(self):
+        from models.patient import Patient  # Lazy import inside method
+        return relationship("Patient", back_populates="region")
 
 #####################
 # Pydantic schemas

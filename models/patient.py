@@ -1,7 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, Session
 from pydantic import BaseModel
 from typing import Optional
+from models.smoker import Smoker
+from models.sex import Sex
 
 Base = declarative_base()
 
@@ -18,10 +20,22 @@ class Patient(Base):
     patient_email = Column(String(50), nullable=False)
     children = Column(Integer, nullable=False)
     charges = Column(Numeric(15, 5))
+    id_region = Column(Integer, ForeignKey("region.id_region"))
+    id_smoker = Column(Integer, ForeignKey("smoker.id_smoker"))
+    id_sex = Column(Integer, ForeignKey("sex.id_sex"))
 
-    region = relationship("Region", back_populates="patient")
     smoker = relationship("Smoker", back_populates="patient")
     sex = relationship("Sex", back_populates="patient")
+
+    # Defining relationship to Region with a local import to avoid circular import
+    def __init__(self, region=None):
+        self.region = region
+
+    # Lazy import to prevent circular import
+    @property
+    def region(self):
+        from models.region import Region  # Lazy import inside method
+        return relationship("Region", back_populates="patients")
 
 #####################
 # Pydantic schemas
@@ -34,6 +48,9 @@ class PatientBase(BaseModel):
     patient_email: str
     children: int
     charges: Optional[float] = None
+    id_region: Optional[int] = None
+    id_smoker: Optional[int] = None
+    id_sex: Optional[int] = None
 
 class PatientCreate(PatientBase):
     pass

@@ -18,7 +18,7 @@ class UserRole(Base):
 # Pydantic schemas
 #####################
 class UserRoleBase(BaseModel):
-    role_name = str
+    role_name: str
 
 class UserRoleCreate(UserRoleBase):
     pass
