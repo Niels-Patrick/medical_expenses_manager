@@ -26,11 +26,11 @@ CREATE TABLE user_role(
 
 CREATE TABLE patient(
    id_patient INT,
-   last_name VARCHAR(150) NOT NULL,
-   first_name VARCHAR(150) NOT NULL,
+   last_name BLOB NOT NULL,
+   first_name BLOB NOT NULL,
    age INT NOT NULL,
    bmi DECIMAL(6,3) NOT NULL,
-   patient_email VARCHAR(150) NOT NULL,
+   patient_email BLOB NOT NULL,
    children INT NOT NULL,
    charges DECIMAL(15,5) NOT NULL,
    id_smoker INT NOT NULL,

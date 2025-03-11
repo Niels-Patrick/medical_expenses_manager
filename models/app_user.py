@@ -14,7 +14,15 @@ class AppUser(Base):
     password = Column(String(50), nullable=False)
     user_email = Column(String(50), nullable=False)
 
-    user_role = relationship("UserRole", back_populates="app_user")
+    # Defining relationship to UserRole with a local import to avoid circular import
+    def __init__(self, user_role=None):
+        self.user_role = user_role
+
+    # Lazy import to prevent circular import
+    @property
+    def user_role(self):
+        from models.user_role import UserRole  # Lazy import inside method
+        return relationship("UserRole", back_populates="app_user")
 
 #####################
 # Pydantic schemas
