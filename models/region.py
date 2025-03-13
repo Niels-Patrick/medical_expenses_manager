@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base, relationship, Session
 from pydantic import BaseModel
-
-Base = declarative_base()
+from .base import Base
 
 #####################
 # The Object class
@@ -12,11 +11,7 @@ class Region(Base):
     id_region = Column(Integer, primary_key=True)
     region_name = Column(String(50), nullable=False)
 
-    # Lazy import to avoid circular import
-    @property
-    def patients(self):
-        from models.patient import Patient  # Lazy import inside method
-        return relationship("Patient", back_populates="region")
+    patient = relationship("Patient", back_populates="region")
 
 #####################
 # Pydantic schemas

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base, relationship, Session
 from pydantic import BaseModel
+from typing import Optional
 
 Base = declarative_base()
 
@@ -30,7 +31,7 @@ class AppUser(Base):
 class AppUserBase(BaseModel):
     username: str
     password: str
-    user_email: str
+    user_email: Optional[str] = None
 
 class AppUserCreate(AppUserBase):
     pass
@@ -40,6 +41,10 @@ class AppUserResponse(AppUserBase):
 
     class Config:
         orm_mode = True
+
+class AppUserForm(AppUserBase):
+    username: str
+    password: str
 
 #################
 # CRUD methods

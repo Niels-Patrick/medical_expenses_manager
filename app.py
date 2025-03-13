@@ -1,22 +1,27 @@
 import streamlit as st
 import requests
-import pandas as pd
-
-API_URL = "http://127.0.0.1:8000/patients/"
 
 st.title("Medical Expenses Manager")
+st.write("Log in")
 
-# Fetching all patients from FastAPI
-response = requests.get(API_URL)
+# Creating a form to take user input
+username_input = st.text_input("Username:")
+password_input = st.text_input("Password:", type="password")
 
-if response.status_code == 200:
-    patients = response.json()
+if st.button("Submit"):
+    if username_input and password_input:
+        response = requests.post(
+            "http://127.0.0.1:8000/users/auth/",
+            json={
+                "username": username_input,
+                "password": password_input
+            }
+        )
 
-    if patients:
-        df = pd.DataFrame(patients)
-        st.dataframe(df) # Alternatively: st.table(df)
-    else:
-        st.info("No patients available.")
-
-else:
-    st.error("Could not fetch patients.")
+        if response.status_code == 200:
+            result = response.json()
+            st.write(f"{result['response_message']}")
+            if result['response_message'] == "User authenticated.":
+                st.switch_page("pages/patient_list.py")
+        else:
+            st.write(f"Error: {response.status_code}, {response.text}")

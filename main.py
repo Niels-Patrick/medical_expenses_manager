@@ -1,7 +1,8 @@
 from fastapi import FastAPI
-from modules import routes
+from modules import routes, routes_user
 from modules.database import engine
 
 app = FastAPI()
 
-app.include_router(routes.router)
+app.include_router(routes_user.router, prefix="/users", tags=["Users"])
+app.include_router(routes.router, prefix="/patients", tags=["Patients"])

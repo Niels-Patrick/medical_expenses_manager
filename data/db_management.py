@@ -13,7 +13,7 @@ try:
 except Exception:
     print("Error during user dataset loading.")
 
-conn = sqlite3.connect("data/db_insurance.db") # Creating database if not exist
+conn = sqlite3.connect("data/db_insurance.db", detect_types=sqlite3.PARSE_DECLTYPES) # Creating database if not exist
 cursor = conn.cursor() # Creating a cursor
 
 
