@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
-from models.patient import Patient, PatientResponse, PatientCreate, create_patient
+from models.patient import Patient, PatientResponse, PatientCreate, PatientUpdate, create_patient, get_patient, update_patient
 from models.region import get_regions, RegionResponse
 from models.smoker import get_smoker_statuses, SmokerResponse
 from models.sex import get_sexes, SexResponse
@@ -70,16 +70,6 @@ def get_patients(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
-# Add patient
-@router.post("/add_patient/")
-def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
-    try:
-        new_patient = create_patient(db, item)
-
-        return JSONResponse(content={"response_message": "New patient added."})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
-
 # Fetch region list
 @router.get("/regions/", response_model=list[RegionResponse])
 def get_all_regions(db: Session = Depends(get_db)):
@@ -133,3 +123,47 @@ def get_all_sexes(db: Session = Depends(get_db)):
         return sex_list
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+    
+# Add patient
+@router.post("/add_patient/")
+def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
+    try:
+        new_patient = create_patient(db, item)
+
+        return JSONResponse(content={"response_message": "New patient added."})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+
+# Get patient
+@router.get("/{id_patient}/", response_model=dict)
+def get_a_patient(id_patient: int, db: Session = Depends(get_db)):
+    patient = get_patient(db, id_patient)
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    return {
+        "id_patient": patient.id_patient,
+        "last_name": fernet.decrypt(ast.literal_eval(patient.last_name)).decode(),
+        "first_name": fernet.decrypt(ast.literal_eval(patient.first_name)).decode(),
+        "age": patient.age,
+        "bmi": patient.bmi,
+        "patient_email": fernet.decrypt(ast.literal_eval(patient.patient_email)).decode(),
+        "children": patient.children,
+        "charges": patient.charges,
+        "region": patient.id_region,
+        "smoker": patient.id_smoker,
+        "sex": patient.id_sex
+    }
+
+# Edit patient
+@router.put("/{id_patient}/edit/", response_model=PatientResponse)
+def edit_patient(id_patient: int, patient_data: PatientUpdate, db: Session = Depends(get_db)):
+    patient = get_patient(db, id_patient)
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    update_patient(db, id_patient, patient_data)
+
+    return JSONResponse(content={"response_message": "Patient updated successfully."})

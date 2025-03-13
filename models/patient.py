@@ -1,8 +1,11 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, LargeBinary
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
 from sqlalchemy.orm import relationship, Session
 from pydantic import BaseModel
 from typing import Optional
 from .base import Base
+from models.region import Region
+from models.smoker import Smoker
+from models.sex import Sex
 
 #####################
 # The Object class
@@ -20,14 +23,6 @@ class Patient(Base):
     id_region = Column(Integer, ForeignKey("region.id_region"))
     id_smoker = Column(Integer, ForeignKey("smoker.id_smoker"))
     id_sex = Column(Integer, ForeignKey("sex.id_sex"))
-
-    """
-    # Defining relationships to Region, Smoker and Sex with local imports to avoid circular imports
-    def __init__(self, region=None, smoker=None, sex=None):
-        self.region = region
-        self.smoker = smoker
-        self.sex = sex
-    """
 
     region = relationship("Region", back_populates="patient")
     smoker = relationship("Smoker", back_populates="patient")
@@ -50,6 +45,18 @@ class PatientBase(BaseModel):
 
 class PatientCreate(PatientBase):
     pass
+
+class PatientUpdate(PatientBase):
+    last_name: Optional[str]
+    first_name: Optional[str]
+    age: Optional[int]
+    bmi: Optional[float]
+    patient_email: Optional[str]
+    children: Optional[int]
+    charges: Optional[float]
+    region: Optional[int]
+    smoker: Optional[int]
+    sex: Optional[int]
 
 class PatientResponse(PatientBase):
     id_patient: int
@@ -104,9 +111,9 @@ def create_patient(db: Session, item: PatientCreate):
         patient_email = item.patient_email,
         children = int(item.children),
         charges = float(item.charges),
-        id_region = int(item.region),
-        id_smoker = int(item.smoker),
-        id_sex = int(item.sex)
+        region = int(item.region),
+        smoker = int(item.smoker),
+        sex = int(item.sex)
     )
 
     try:
@@ -119,7 +126,7 @@ def create_patient(db: Session, item: PatientCreate):
     
     return db_patient
 
-def update_patient(db: Session, patient_id: int, patient_data: PatientCreate):
+def update_patient(db: Session, patient_id: int, patient_data: PatientUpdate):
     """
     Updates the information of a patient
 
@@ -132,16 +139,45 @@ def update_patient(db: Session, patient_id: int, patient_data: PatientCreate):
         - db_patient: the patient object
     """
     db_patient = db.query(Patient).filter(Patient.id_patient == patient_id).first()
+    if not db_patient:
+        raise Exception("Patient not found")
+    
+    try:
+        # Update basic fields
+        db_patient.last_name = patient_data.last_name
+        db_patient.first_name = patient_data.first_name
+        db_patient.age = int(patient_data.age)
+        db_patient.bmi = float(patient_data.bmi)
+        db_patient.patient_email = patient_data.patient_email
+        db_patient.children = int(patient_data.children)
+        db_patient.charges = float(patient_data.charges)
 
-    if db_patient:
+        # Fetch and assign relationship fields
+        if patient_data.region is not None:
+            region = db.query(Region).filter(Region.id_region == int(patient_data.region)).first()
+            if not region:
+                raise Exception("Invalid region ID")
+            db_patient.region = region  # Assign related object
 
-        for key, value in patient_data.dict().items():
-            setattr(db_patient, key, value)
+        if patient_data.smoker is not None:
+            smoker = db.query(Smoker).filter(Smoker.id_smoker == int(patient_data.smoker)).first()
+            if not smoker:
+                raise Exception("Invalid smoker ID")
+            db_patient.smoker = smoker  # Assign related object
 
+        if patient_data.sex is not None:
+            sex = db.query(Sex).filter(Sex.id_sex == int(patient_data.sex)).first()
+            if not sex:
+                raise Exception("Invalid sex ID")
+            db_patient.sex = sex  # Assign related object
+
+        # Commit the transaction
         db.commit()
         db.refresh(db_patient)
 
-    return db_patient
+        return db_patient
+    except ValueError as e:
+        raise Exception(f"Invalid input data: {str(e)}")
 
 def delete_patient(db: Session, patient_id: int):
     """
