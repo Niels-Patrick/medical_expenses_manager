@@ -3,6 +3,7 @@ import requests
 import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from modules.frontend_methods import get_regions, get_sexes, get_smokers, get_patient
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -12,46 +13,6 @@ key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
     raise ValueError("FERNET_KEY environment variable is not set.")
-
-def get_regions():
-    try:
-        # Fetching all regions from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/regions/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-
-def get_smokers():
-    try:
-        # Fetching all smoker statuses from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/smokers/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-    
-def get_sexes():
-    try:
-        # Fetching all sexes from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/sexes/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-    
-def get_patient(id_patient):
-    try:
-        # Fetching a patient based on their ID
-        response = requests.get(f"http://127.0.0.1:8000/patients/{id_patient}/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching patient data: {e}")
-        return None
 
 # Getting data for region, smoker and sex
 regions = get_regions()
@@ -71,10 +32,11 @@ sex_labels = [sex[1] for sex in sex_labels_data]
 if "edit_form_visible" not in st.session_state:
     st.session_state.edit_form_visible = False
 
+# Title and information
 st.title("Medical Expenses Manager")
 st.write("Edit a patient")
 
-
+# Creating a form to take patient ID input
 id_patient = st.number_input("Enter patient ID to edit:", min_value=0, step=1)
 
 if st.button("Fetch patient"):
@@ -84,10 +46,10 @@ if st.button("Fetch patient"):
         st.session_state.edit_form_visible = True
         st.session_state.patient = patient
 
+# Creating a form to take patient input
 if st.session_state.edit_form_visible:
     patient = st.session_state.patient
 
-    # Creating a form to take patient input
     last_name = st.text_input("Last name:", value=patient["last_name"])
     first_name = st.text_input("First name:", value=patient["first_name"])
     age = st.text_input("Age:", value=patient["age"])
@@ -104,6 +66,7 @@ if st.session_state.edit_form_visible:
         id_smoker = next(a_smoker[0] for a_smoker in is_smoker_data if a_smoker[1] == smoker)
         id_sex = next(a_sex[0] for a_sex in sex_labels_data if a_sex[1] == sex)
 
+        # Sending the updated patient's data to FastAPI
         response = requests.put(
             f"http://127.0.0.1:8000/patients/{id_patient}/edit/",
             json={
@@ -123,6 +86,6 @@ if st.session_state.edit_form_visible:
         if response.status_code == 200:
             result = response.json()
             st.write(f"{result['response_message']}")
-            st.switch_page("pages/patient_list.py")
+            st.switch_page("pages/patient_list.py") # Rerouting to the patients list page
         else:
             st.write(f"Error: {response.status_code}, {response.text}")

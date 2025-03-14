@@ -3,6 +3,7 @@ import requests
 import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from modules.frontend_methods import get_regions, get_sexes, get_smokers
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -13,42 +14,12 @@ fernet = Fernet(key)
 if not fernet:
     raise ValueError("FERNET_KEY environment variable is not set.")
 
-def get_regions():
-    try:
-        # Fetching all regions from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/regions/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-
-def get_smokers():
-    try:
-        # Fetching all smoker statuses from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/smokers/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-    
-def get_sexes():
-    try:
-        # Fetching all sexes from FastAPI
-        response = requests.get("http://127.0.0.1:8000/patients/sexes/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
-        return []
-
 # Getting data for region, smoker and sex
 regions = get_regions()
 smokers = get_smokers()
 sexes = get_sexes()
 
-# Getting only region names, smoker statues (yes/no) and sex labels
+# Getting only region names, smoker statues and sex labels
 region_data = [(region["id_region"], region["region_name"]) for region in regions]
 is_smoker_data = [(smoker["id_smoker"], smoker["is_smoker"]) for smoker in smokers]
 sex_labels_data = [(sex["id_sex"], sex["sex_label"]) for sex in sexes]
@@ -57,6 +28,7 @@ region_names = [region[1] for region in region_data]
 is_smoker = [smoker[1] for smoker in is_smoker_data]
 sex_labels = [sex[1] for sex in sex_labels_data]
 
+# Title and information
 st.title("Medical Expenses Manager")
 st.write("Add a new patient")
 
@@ -77,6 +49,7 @@ if st.button("Submit"):
     id_smoker = next(a_smoker[0] for a_smoker in is_smoker_data if a_smoker[1] == smoker)
     id_sex = next(a_sex[0] for a_sex in sex_labels_data if a_sex[1] == sex)
 
+    # Sending the new patient's data to FastAPI
     response = requests.post(
         "http://127.0.0.1:8000/patients/add_patient/",
         json={
@@ -96,6 +69,6 @@ if st.button("Submit"):
     if response.status_code == 200:
         result = response.json()
         st.write(f"{result['response_message']}")
-        st.switch_page("pages/patient_list.py")
+        st.switch_page("pages/patient_list.py") # Rerouting to the patients list
     else:
         st.write(f"Error: {response.status_code}, {response.text}")

@@ -25,10 +25,17 @@ if not fernet:
 ###########
 # Routes
 ###########
-
-# Patient list route
 @router.get("/patients/", response_model=list[PatientResponse])
 def get_patients(db: Session = Depends(get_db)):
+    """
+    Route to get the patients list
+
+    Parameters:
+        - db: the current database session
+    
+    Return:
+        - patient_list: a list of all patients' data
+    """
     try:
         patients = db.query(Patient).options(
             joinedload(Patient.region),
@@ -57,9 +64,17 @@ def get_patients(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
-# Fetch region list
 @router.get("/regions/", response_model=list[RegionResponse])
 def get_all_regions(db: Session = Depends(get_db)):
+    """
+    Route to get the regions list
+
+    Parameters:
+        - db: the current database session
+
+    Return:
+        - region_list: a list of all regions' data
+    """
     try:
         regions = get_regions(db)
 
@@ -75,9 +90,17 @@ def get_all_regions(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
-# Fetch smokers list
 @router.get("/smokers/", response_model=list[SmokerResponse])
 def get_all_smokers(db: Session = Depends(get_db)):
+    """
+    Route to get the smoker statuses list
+
+    Parameters:
+        - db: the current database session
+
+    Return:
+        - smoker_list: a list of all smoker statuses' data
+    """
     try:
         smokers = get_smoker_statuses(db)
 
@@ -93,9 +116,17 @@ def get_all_smokers(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
-# Fetch sexes list
 @router.get("/sexes/", response_model=list[SexResponse])
 def get_all_sexes(db: Session = Depends(get_db)):
+    """
+    Route to get the sexes list
+
+    Parameters:
+        - db: the current database session
+
+    Return:
+        - sex_list: a list of all sexes' data
+    """
     try:
         sexes = get_sexes(db)
 
@@ -111,9 +142,18 @@ def get_all_sexes(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
-# Add patient
 @router.post("/add_patient/")
 def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
+    """
+    Route to add a new patient into the database
+
+    Parameters:
+        - item: the new patient's data received from a form
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming that the new patient has been added
+    """
     try:
         new_patient = create_patient(db, item)
 
@@ -121,9 +161,18 @@ def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
 
-# Get patient
 @router.get("/{id_patient}/", response_model=dict)
 def get_a_patient(id_patient: int, db: Session = Depends(get_db)):
+    """
+    Route to get a specific patient's data
+
+    Parameters:
+        - id_patient: the patient's ID
+        - db: the current database session
+    
+    Return:
+        - the new patient's data in JSON format
+    """
     patient = get_patient(db, id_patient)
 
     if not patient:
@@ -143,9 +192,19 @@ def get_a_patient(id_patient: int, db: Session = Depends(get_db)):
         "sex": patient.id_sex
     }
 
-# Edit patient
 @router.put("/{id_patient}/edit/", response_model=PatientResponse)
 def edit_patient(id_patient: int, patient_data: PatientUpdate, db: Session = Depends(get_db)):
+    """
+    Route to edit a specific patient's data
+
+    Parameters:
+        - id_patient: the patient's ID
+        - patient_data: the updated patient's data received from a form
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming the success of the update process
+    """
     patient = get_patient(db, id_patient)
 
     if not patient:
@@ -155,9 +214,18 @@ def edit_patient(id_patient: int, patient_data: PatientUpdate, db: Session = Dep
 
     return JSONResponse(content={"response_message": "Patient updated successfully."})
 
-# Delete patient
 @router.delete("/{id_patient}/delete/", response_model=PatientResponse)
 def delete_a_patient(id_patient: int, db: Session = Depends(get_db)):
+    """
+    Route to delete a specific patient from the database
+
+    Parameters:
+        - id_patient: the patient's ID
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming the success of the deletion process
+    """
     patient = get_patient(db, id_patient)
 
     if not patient:

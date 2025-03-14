@@ -23,10 +23,17 @@ if not fernet:
 ###########
 # Routes
 ###########
-
-# User list route
 @router.get("/users/", response_model=list[AppUserResponse])
 def get_all_app_users(db: Session = Depends(get_db)):
+    """
+    Route to get the users list
+
+    Parameters:
+        - db: the current database session
+
+    Return:
+        - app_user_list: the list of app users' data
+    """
     try:
         users = db.query(AppUser).options(
             joinedload(AppUser.user_role)
@@ -45,10 +52,18 @@ def get_all_app_users(db: Session = Depends(get_db)):
         return app_user_list
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching users {str(e)}")
-    
-# Fetch role list
+
 @router.get("/roles/", response_model=list[UserRoleResponse])
 def get_roles(db: Session = Depends(get_db)):
+    """
+    Route to get the roles list
+
+    Parameters:
+        - db: the current database session
+
+    Return:
+        - role_list: the list of roles' data
+    """
     try:
         roles = get_user_roles(db)
 
@@ -64,9 +79,18 @@ def get_roles(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching roles {str(e)}")
 
-# Authentication route
 @router.post("/auth/")
 async def authentication(data: AppUserForm, db: Session = Depends(get_db)):
+    """
+    Route for authentication
+
+    Parameters:
+        - data: the user's data received from a form
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming or invalidating the authentication
+    """
     try:
         username = data.username
         password = data.password
@@ -83,19 +107,37 @@ async def authentication(data: AppUserForm, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching users: {repr(e)}")
 
-# Add user
 @router.post("/add_user/")
 def add_user(item: AppUserCreate, db: Session = Depends(get_db)):
+    """
+    Route for adding a new user to the database
+
+    Parameters:
+        - item: the new user's data received from a form
+        - db: the current database session
+    
+    Return:
+        - a JSON response message confirming that the new user has been added
+    """
     try:
         new_user = create_app_user(db, item)
 
         return JSONResponse(content={"response_message": "New user added."})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching user {str(e)}")
-    
-# Get user
+
 @router.get("/{id_user}/", response_model=dict)
 def get_a_user(id_user: int, db: Session = Depends(get_db)):
+    """
+    Route to get a specific user's data
+
+    Parameters:
+        - id_user: the user's id
+        - db: the current database session
+
+    Return:
+        - the user's data in JSON format
+    """
     user = get_app_user(db, id_user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -108,9 +150,19 @@ def get_a_user(id_user: int, db: Session = Depends(get_db)):
         "user_role": user.id_role
     }
 
-# Edit user
 @router.put("/{id_user}/edit/", response_model=AppUserResponse)
 def edit_user(id_user: int, user_data: AppUserUpdate, db: Session = Depends(get_db)):
+    """
+    Route to edit a specific user's data
+
+    Parameters:
+        - id_user: the user's id
+        - user_data: the updated user's data received from a form
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming the success of the updating process
+    """
     user = get_app_user(db, id_user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -119,9 +171,18 @@ def edit_user(id_user: int, user_data: AppUserUpdate, db: Session = Depends(get_
 
     return JSONResponse(content={"response_message": "User updated successfully."})
 
-# Delete user
 @router.delete("/{id_user}/delete/", response_model=AppUserResponse)
 def delete_user(id_user: int, db: Session = Depends(get_db)):
+    """
+    Route to delete a specific user
+
+    Parameters:
+        - id_user: the user's id
+        - db: the current database session
+
+    Return:
+        - a JSON response message confirming the user deletion
+    """
     user = get_app_user(db, id_user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
