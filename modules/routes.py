@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
-from models.patient import Patient, PatientResponse, PatientCreate, PatientUpdate, create_patient, get_patient, update_patient
+from models.patient import Patient, PatientResponse, PatientCreate, PatientUpdate, create_patient, get_patient, update_patient, delete_patient
 from models.region import get_regions, RegionResponse
 from models.smoker import get_smoker_statuses, SmokerResponse
 from models.sex import get_sexes, SexResponse
-from modules.database import session_local
+from modules.database import get_db
 import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
@@ -21,19 +21,6 @@ key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
     raise ValueError("FERNET_KEY environment variable is not set.")
-
-# Dependency: Getting DB session
-def get_db():
-    """
-    Gets the database session
-    """
-    db = session_local()
-
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 ###########
 # Routes
@@ -167,3 +154,15 @@ def edit_patient(id_patient: int, patient_data: PatientUpdate, db: Session = Dep
     update_patient(db, id_patient, patient_data)
 
     return JSONResponse(content={"response_message": "Patient updated successfully."})
+
+# Delete patient
+@router.delete("/{id_patient}/delete/", response_model=PatientResponse)
+def delete_a_patient(id_patient: int, db: Session = Depends(get_db)):
+    patient = get_patient(db, id_patient)
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    delete_patient(db, id_patient)
+    
+    return JSONResponse(content={"response_message": "Patient deleted successfully."})

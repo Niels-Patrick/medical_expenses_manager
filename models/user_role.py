@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base, relationship, Session
+from sqlalchemy.orm import relationship, Session
 from pydantic import BaseModel
-
-Base = declarative_base()
+from models.base import Base
 
 #####################
 # The Object class

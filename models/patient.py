@@ -2,10 +2,10 @@ from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
 from sqlalchemy.orm import relationship, Session
 from pydantic import BaseModel
 from typing import Optional
-from .base import Base
 from models.region import Region
 from models.smoker import Smoker
 from models.sex import Sex
+from models.base import Base
 
 #####################
 # The Object class
@@ -110,11 +110,27 @@ def create_patient(db: Session, item: PatientCreate):
         bmi = float(item.bmi),
         patient_email = item.patient_email,
         children = int(item.children),
-        charges = float(item.charges),
-        region = int(item.region),
-        smoker = int(item.smoker),
-        sex = int(item.sex)
+        charges = float(item.charges)
     )
+
+    # Fetch and assign relationship fields
+    if item.region is not None:
+        region = db.query(Region).filter(Region.id_region == item.region).first()
+        if not region:
+            raise Exception("Invalid region ID")
+        db_patient.region = region  # Assign related object
+
+    if item.smoker is not None:
+        smoker = db.query(Smoker).filter(Smoker.id_smoker == item.smoker).first()
+        if not smoker:
+            raise Exception("Invalid smoker ID")
+        db_patient.smoker = smoker  # Assign related object
+
+    if item.sex is not None:
+        sex = db.query(Sex).filter(Sex.id_sex == item.sex).first()
+        if not sex:
+            raise Exception("Invalid sex ID")
+        db_patient.sex = sex  # Assign related object
 
     try:
         db.add(db_patient)
@@ -195,5 +211,7 @@ def delete_patient(db: Session, patient_id: int):
     if db_patient:
         db.delete(db_patient)
         db.commit()
+    else:
+        raise Exception("Patient not found")
     
     return db_patient

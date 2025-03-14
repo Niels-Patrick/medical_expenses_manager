@@ -1,9 +1,5 @@
-from models.patient import Patient
-from models.region import Region
-from models.smoker import Smoker
-from models.sex import Sex
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 from models.base import Base
 
 # SQLite database URL
@@ -17,3 +13,15 @@ session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Creating the tables
 Base.metadata.create_all(bind=engine)
+
+# Dependency: Getting DB session
+def get_db():
+    """
+    Gets the database session
+    """
+    db = session_local()
+
+    try:
+        yield db
+    finally:
+        db.close()
