@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from modules import routes, routes_user
-from modules.database import engine
 
 app = FastAPI()
 

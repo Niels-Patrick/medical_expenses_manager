@@ -4,6 +4,7 @@ import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from modules.frontend_methods import get_roles, get_user
+import hashlib
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -45,23 +46,35 @@ if st.session_state.edit_form_visible:
     user = st.session_state.user
 
     username = st.text_input("Username:", value=user["username"])
-    password = st.text_input("Password:", value=user["password"], type="password")
+    password = st.text_input("Password:", type="password")
     user_email = st.text_input("Email:", value=user["user_email"])
     user_role = st.selectbox("Role:", role_names, index=user["user_role"])
 
     if st.button("Submit"):
         id_role = next(role[0] for role in role_data if role[1] == user_role)
 
-        # Sending the updated user's data to FastAPI
-        response = requests.put(
-            f"http://127.0.0.1:8000/users/{id_user}/edit/",
-            json={
-                "username": username,
-                "password": str(fernet.encrypt(password.encode())),
-                "user_email": user_email,
-                "user_role": str(id_role)
-            }
-        )
+        if password:
+            # Sending the updated user's data to FastAPI
+            response = requests.put(
+                f"http://127.0.0.1:8000/users/{id_user}/edit/",
+                json={
+                    "username": username,
+                    "password": str(fernet.encrypt((hashlib.sha256(password.encode()).hexdigest()).encode())),
+                    "user_email": user_email,
+                    "user_role": str(id_role)
+                }
+            )
+        else:
+            # Sending the updated user's data to FastAPI
+            response = requests.put(
+                f"http://127.0.0.1:8000/users/{id_user}/edit/",
+                json={
+                    "username": username,
+                    "password": str(fernet.encrypt(user["password"].encode())),
+                    "user_email": user_email,
+                    "user_role": str(id_role)
+                }
+            )
 
         if response.status_code == 200:
             result = response.json()

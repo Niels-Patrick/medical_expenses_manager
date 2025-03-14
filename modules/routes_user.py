@@ -8,6 +8,7 @@ import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 import ast
+import hashlib
 
 router = APIRouter()
 
@@ -99,7 +100,7 @@ async def authentication(data: AppUserForm, db: Session = Depends(get_db)):
 
         for app_user in app_users:
             decrypted_password = fernet.decrypt(ast.literal_eval(app_user.password)).decode()
-            if app_user.username == username and decrypted_password == password:
+            if app_user.username == username and decrypted_password == hashlib.sha256(password.encode()).hexdigest():
                 return JSONResponse(content={"response_message": "User authenticated."})
 
         return JSONResponse(content={"response_message": "Wrong username or password."})

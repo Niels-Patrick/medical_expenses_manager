@@ -3,6 +3,7 @@ import requests
 import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+import hashlib
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -54,7 +55,7 @@ if st.button("Submit"):
         "http://127.0.0.1:8000/users/add_user/",
         json={
             "username": username,
-            "password": str(fernet.encrypt(password.encode())),
+            "password": str(fernet.encrypt((hashlib.sha256(password.encode()).hexdigest()).encode())),
             "user_email": user_email,
             "user_role": str(id_role)
         }

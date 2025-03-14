@@ -1,6 +1,7 @@
 import pandas as pd
 from faker import Faker
 from cryptography.fernet import Fernet
+import hashlib
 import random
 
 try:
@@ -36,7 +37,7 @@ def faker_user():
     """
     df_user = pd.DataFrame()
     df_user["username"] = [fake.unique.user_name() for _ in range(10)]
-    df_user["password"] = [fernet.encrypt((fake.password()).encode()) for _ in range(10)]
+    df_user["password"] = [fernet.encrypt((hashlib.sha256(fake.password().encode()).hexdigest()).encode()) for _ in range(10)]
     df_user["user_email"] = [fake.unique.email() for _ in range(10)]
     df_user["role_name"] = [random.choice(["admin", "medic", "patient"]) for _ in range(10)]
 
