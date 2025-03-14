@@ -43,6 +43,15 @@ class PatientBase(BaseModel):
     smoker: Optional[str] = None
     sex: Optional[str] = None
 
+class PatientBaseAI(BaseModel):
+    age: int
+    bmi: float
+    children: int
+    charges: Optional[float] = None
+    region: Optional[str] = None
+    smoker: Optional[str] = None
+    sex: Optional[str] = None
+
 class PatientCreate(PatientBase):
     pass
 
@@ -59,6 +68,12 @@ class PatientUpdate(PatientBase):
     sex: Optional[int]
 
 class PatientResponse(PatientBase):
+    id_patient: int
+
+    class Config:
+        orm_mode = True
+
+class PatientResponseAI(PatientBaseAI):
     id_patient: int
 
     class Config:
