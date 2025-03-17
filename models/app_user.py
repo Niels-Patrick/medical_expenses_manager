@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 from models.base import Base
 from models.user_role import UserRole
+import logging
 
 #####################
 # The Object class
@@ -94,6 +95,7 @@ def create_app_user(db: Session, item: AppUserCreate):
     if item.user_role is not None:
         role = db.query(UserRole).filter(UserRole.id_role == int(item.user_role)).first()
         if not role:
+            logging.error("Invalid role ID")
             raise Exception("Invalid role ID")
         db_app_user.user_role = role  # Assign related object
 
@@ -117,6 +119,7 @@ def update_app_user(db: Session, user_id: int, app_user_data: AppUserCreate):
     """
     db_app_user = db.query(AppUser).filter(AppUser.id_user == user_id).first()
     if not db_app_user:
+        logging.error("User not found")
         raise Exception("User not found")
 
     try:
@@ -129,6 +132,7 @@ def update_app_user(db: Session, user_id: int, app_user_data: AppUserCreate):
         if app_user_data.user_role is not None:
             role = db.query(UserRole).filter(UserRole.id_role == int(app_user_data.user_role)).first()
             if not role:
+                logging.error("Invalid role ID")
                 raise Exception("Invalid role ID")
             db_app_user.user_role = role  # Assign related object
 
@@ -137,6 +141,7 @@ def update_app_user(db: Session, user_id: int, app_user_data: AppUserCreate):
 
         return db_app_user
     except ValueError as e:
+        logging.error(f"Invalid input data: {str(e)}")
         raise Exception(f"Invalid input data: {str(e)}")
 
 def delete_app_user(db: Session, user_id: int):
@@ -153,6 +158,7 @@ def delete_app_user(db: Session, user_id: int):
     db_app_user = db.query(AppUser).filter(AppUser.id_user == user_id).first()
 
     if not db_app_user:
+        logging.error("User not found")
         raise Exception("User not found")
     
     db.delete(db_app_user)

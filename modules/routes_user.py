@@ -9,6 +9,7 @@ from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 import ast
 import hashlib
+import logging
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ load_dotenv()
 key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
+    logging.error("Error fetching FERNET_KEY")
     raise ValueError("FERNET_KEY environment variable is not set.")
 
 ###########
@@ -52,6 +54,7 @@ def get_all_app_users(db: Session = Depends(get_db)):
 
         return app_user_list
     except Exception as e:
+        logging.error(f"Error fetching users: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching users {str(e)}")
 
 @router.get("/roles/", response_model=list[UserRoleResponse])
@@ -78,6 +81,7 @@ def get_roles(db: Session = Depends(get_db)):
 
         return role_list
     except Exception as e:
+        logging.error(f"Error fetching roles: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching roles {str(e)}")
 
 @router.post("/auth/")
@@ -106,6 +110,7 @@ async def authentication(data: AppUserForm, db: Session = Depends(get_db)):
         return JSONResponse(content={"response_message": "Wrong username or password."})
 
     except Exception as e:
+        logging.error(f"Error fetching users: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching users: {repr(e)}")
 
 @router.post("/add_user/")
@@ -125,7 +130,8 @@ def add_user(item: AppUserCreate, db: Session = Depends(get_db)):
 
         return JSONResponse(content={"response_message": "New user added."})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching user {str(e)}")
+        logging.error(f"Error fetching user data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching user data {str(e)}")
 
 @router.get("/{id_user}/", response_model=dict)
 def get_a_user(id_user: int, db: Session = Depends(get_db)):
@@ -141,6 +147,7 @@ def get_a_user(id_user: int, db: Session = Depends(get_db)):
     """
     user = get_app_user(db, id_user)
     if not user:
+        logging.error("User not found")
         raise HTTPException(status_code=404, detail="User not found")
     
     return {
@@ -166,6 +173,7 @@ def edit_user(id_user: int, user_data: AppUserUpdate, db: Session = Depends(get_
     """
     user = get_app_user(db, id_user)
     if not user:
+        logging.error("User not found")
         raise HTTPException(status_code=404, detail="User not found")
     
     update_app_user(db, id_user, user_data)
@@ -186,6 +194,7 @@ def delete_user(id_user: int, db: Session = Depends(get_db)):
     """
     user = get_app_user(db, id_user)
     if not user:
+        logging.error("User not found")
         raise HTTPException(status_code=404, detail="User not found")
     
     delete_app_user(db, id_user)

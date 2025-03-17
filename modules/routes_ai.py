@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from modules.database import get_db
 import joblib
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+import logging
 
 router = APIRouter()
 
@@ -44,6 +44,7 @@ def get_patients(db: Session = Depends(get_db)):
 
         return patient_list
     except Exception as e:
+        logging.error(f"Error fetching patients: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
 @router.post("/charges_prediction")
@@ -101,4 +102,5 @@ async def charges_prediction(request: Request):
         return JSONResponse(content={"response_message": f"Charges prediction: {str(y_pred)}"})
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+        logging.error(f"Error fetching patient's data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching patient's data {str(e)}")

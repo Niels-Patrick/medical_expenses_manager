@@ -1,7 +1,7 @@
 import streamlit as st
-import requests
 import pandas as pd
 from modules.frontend_methods import get_users
+import logging
 
 # Title and information
 st.title("Medical Expenses Manager")
@@ -15,4 +15,5 @@ if users:
     df = pd.DataFrame(users)
     st.dataframe(df)
 else:
+    logging.error("No user data available.")
     st.write("No user data available.")

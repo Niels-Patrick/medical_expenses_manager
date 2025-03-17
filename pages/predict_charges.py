@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 from modules.frontend_methods import get_regions, get_sexes, get_smokers
+import logging
 
 # Getting data for region, smoker and sex
 regions = get_regions()
@@ -47,4 +48,5 @@ if st.button("Submit"):
         result = response.json()
         st.write(f"{result['response_message']}")
     else:
+        logging.error(f"Error {response.status_code}, {response.text}")
         st.write(f"Error: {response.status_code}, {response.text}")

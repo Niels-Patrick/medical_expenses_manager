@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import logging
 
 def get_regions():
     """
@@ -13,6 +14,7 @@ def get_regions():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching region data: {e}")
         st.error(f"Error fetching region data: {e}")
         return []
 
@@ -28,7 +30,8 @@ def get_smokers():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
+        logging.error(f"Error fetching smoker data: {e}")
+        st.error(f"Error fetching smoker data: {e}")
         return []
     
 def get_sexes():
@@ -43,7 +46,8 @@ def get_sexes():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching region data: {e}")
+        logging.error(f"Error fetching sex data: {e}")
+        st.error(f"Error fetching sex data: {e}")
         return []
     
 def get_patients():
@@ -58,6 +62,7 @@ def get_patients():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching patient data: {e}")
         st.error(f"Error fetching patient data: {e}")
         return []
     
@@ -76,6 +81,7 @@ def get_patient(id_patient):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching patient data: {e}")
         st.error(f"Error fetching patient data: {e}")
         return None
     
@@ -91,6 +97,7 @@ def get_roles():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching role data: {e}")
         st.error(f"Error fetching role data: {e}")
         return []
     
@@ -107,6 +114,7 @@ def get_users():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching user data: {e}")
         st.error(f"Error fetching user data: {e}")
         return []
     
@@ -125,5 +133,6 @@ def get_user(id_user):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching user data: {e}")
         st.error(f"Error fetching user data: {e}")
         return None

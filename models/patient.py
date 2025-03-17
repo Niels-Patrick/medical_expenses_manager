@@ -6,6 +6,7 @@ from models.region import Region
 from models.smoker import Smoker
 from models.sex import Sex
 from models.base import Base
+import logging
 
 #####################
 # The Object class
@@ -131,18 +132,21 @@ def create_patient(db: Session, item: PatientCreate):
     if item.region is not None:
         region = db.query(Region).filter(Region.id_region == item.region).first()
         if not region:
+            logging.error("Invalid region ID")
             raise Exception("Invalid region ID")
         db_patient.region = region  # Assign related object
 
     if item.smoker is not None:
         smoker = db.query(Smoker).filter(Smoker.id_smoker == item.smoker).first()
         if not smoker:
+            logging.error("Invalid smoker ID")
             raise Exception("Invalid smoker ID")
         db_patient.smoker = smoker  # Assign related object
 
     if item.sex is not None:
         sex = db.query(Sex).filter(Sex.id_sex == item.sex).first()
         if not sex:
+            logging.error("Invalid sex ID")
             raise Exception("Invalid sex ID")
         db_patient.sex = sex  # Assign related object
 
@@ -152,6 +156,7 @@ def create_patient(db: Session, item: PatientCreate):
         db.refresh(db_patient)
 
     except Exception as e:
+        logging.error("Error adding and committing")
         db.rollback()
     
     return db_patient
@@ -170,6 +175,7 @@ def update_patient(db: Session, patient_id: int, patient_data: PatientUpdate):
     """
     db_patient = db.query(Patient).filter(Patient.id_patient == patient_id).first()
     if not db_patient:
+        logging.error("Patient not found")
         raise Exception("Patient not found")
     
     try:
@@ -186,18 +192,21 @@ def update_patient(db: Session, patient_id: int, patient_data: PatientUpdate):
         if patient_data.region is not None:
             region = db.query(Region).filter(Region.id_region == int(patient_data.region)).first()
             if not region:
+                logging.error("Invalid region ID")
                 raise Exception("Invalid region ID")
             db_patient.region = region  # Assign related object
 
         if patient_data.smoker is not None:
             smoker = db.query(Smoker).filter(Smoker.id_smoker == int(patient_data.smoker)).first()
             if not smoker:
+                logging.error("Invalid smoker ID")
                 raise Exception("Invalid smoker ID")
             db_patient.smoker = smoker  # Assign related object
 
         if patient_data.sex is not None:
             sex = db.query(Sex).filter(Sex.id_sex == int(patient_data.sex)).first()
             if not sex:
+                logging.error("Invalid sex ID")
                 raise Exception("Invalid sex ID")
             db_patient.sex = sex  # Assign related object
 
@@ -207,6 +216,7 @@ def update_patient(db: Session, patient_id: int, patient_data: PatientUpdate):
 
         return db_patient
     except ValueError as e:
+        logging.error(f"Invalid input data: {str(e)}")
         raise Exception(f"Invalid input data: {str(e)}")
 
 def delete_patient(db: Session, patient_id: int):
@@ -226,6 +236,7 @@ def delete_patient(db: Session, patient_id: int):
         db.delete(db_patient)
         db.commit()
     else:
+        logging.error("Patient not found")
         raise Exception("Patient not found")
     
     return db_patient

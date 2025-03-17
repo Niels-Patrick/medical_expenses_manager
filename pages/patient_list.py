@@ -1,7 +1,7 @@
 import streamlit as st
-import requests
 import pandas as pd
 from modules.frontend_methods import get_patients
+import logging
 
 # Title and information
 st.title("Medical Expenses Manager")
@@ -15,4 +15,5 @@ if patients:
     df = pd.DataFrame(patients)
     st.dataframe(df)
 else:
+    logging.error("No patient data available")
     st.write("No patient data available.")

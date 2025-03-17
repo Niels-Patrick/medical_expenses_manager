@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import logging
 
 # Title and information
 st.title("Medical Expenses Manager")
@@ -30,4 +31,5 @@ if st.button("Submit"):
                 st.switch_page("pages/patient_list.py") # Rerouting to the patients list
 
         else:
+            logging.error(f"Error: {response.status_code}, {response.text}")
             st.write(f"Error: {response.status_code}, {response.text}")

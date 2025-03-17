@@ -10,6 +10,7 @@ import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 import ast
+import logging
 
 router = APIRouter()
 
@@ -20,6 +21,7 @@ load_dotenv()
 key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
+    logging.error("Error fetching FERNET_KEY")
     raise ValueError("FERNET_KEY environment variable is not set.")
 
 ###########
@@ -62,6 +64,7 @@ def get_patients(db: Session = Depends(get_db)):
 
         return patient_list
     except Exception as e:
+        logging.error(f"Error fetching patients: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
     
 @router.get("/regions/", response_model=list[RegionResponse])
@@ -88,7 +91,8 @@ def get_all_regions(db: Session = Depends(get_db)):
 
         return region_list
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+        logging.error(f"Error fetching regions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching regions {str(e)}")
     
 @router.get("/smokers/", response_model=list[SmokerResponse])
 def get_all_smokers(db: Session = Depends(get_db)):
@@ -114,7 +118,8 @@ def get_all_smokers(db: Session = Depends(get_db)):
 
         return smoker_list
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+        logging.error(f"Error fetching smokers: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching smokers {str(e)}")
     
 @router.get("/sexes/", response_model=list[SexResponse])
 def get_all_sexes(db: Session = Depends(get_db)):
@@ -140,7 +145,8 @@ def get_all_sexes(db: Session = Depends(get_db)):
 
         return sex_list
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+        logging.error(f"Error fetching sexes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching sexes {str(e)}")
     
 @router.post("/add_patient/")
 def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
@@ -159,7 +165,8 @@ def add_patient(item: PatientCreate, db: Session = Depends(get_db)):
 
         return JSONResponse(content={"response_message": "New patient added."})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching patients {str(e)}")
+        logging.error(f"Error fetching patient data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error fetching patient data {str(e)}")
 
 @router.get("/{id_patient}/", response_model=dict)
 def get_a_patient(id_patient: int, db: Session = Depends(get_db)):
@@ -176,6 +183,7 @@ def get_a_patient(id_patient: int, db: Session = Depends(get_db)):
     patient = get_patient(db, id_patient)
 
     if not patient:
+        logging.error("Patient not found")
         raise HTTPException(status_code=404, detail="Patient not found")
     
     return {
@@ -208,6 +216,7 @@ def edit_patient(id_patient: int, patient_data: PatientUpdate, db: Session = Dep
     patient = get_patient(db, id_patient)
 
     if not patient:
+        logging.error("Patient not found")
         raise HTTPException(status_code=404, detail="Patient not found")
     
     update_patient(db, id_patient, patient_data)
@@ -229,6 +238,7 @@ def delete_a_patient(id_patient: int, db: Session = Depends(get_db)):
     patient = get_patient(db, id_patient)
 
     if not patient:
+        logging.error("Patient not found")
         raise HTTPException(status_code=404, detail="Patient not found")
     
     delete_patient(db, id_patient)

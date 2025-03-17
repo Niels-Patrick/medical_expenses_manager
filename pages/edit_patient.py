@@ -4,6 +4,7 @@ import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from modules.frontend_methods import get_regions, get_sexes, get_smokers, get_patient
+import logging
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -12,6 +13,7 @@ load_dotenv()
 key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
+    logging.error("Error fetching FERNET_KEY")
     raise ValueError("FERNET_KEY environment variable is not set.")
 
 # Getting data for region, smoker and sex
@@ -88,4 +90,5 @@ if st.session_state.edit_form_visible:
             st.write(f"{result['response_message']}")
             st.switch_page("pages/patient_list.py") # Rerouting to the patients list page
         else:
+            logging.error(f"Error {response.status_code}, {response.text}")
             st.write(f"Error: {response.status_code}, {response.text}")

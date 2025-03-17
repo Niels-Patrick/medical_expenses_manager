@@ -3,7 +3,9 @@ import requests
 import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from modules.frontend_methods import get_roles
 import hashlib
+import logging
 
 # Loading .env file (only works locally)
 load_dotenv()
@@ -12,22 +14,8 @@ load_dotenv()
 key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
 if not fernet:
+    logging.error("Error fetching FERNET_KEY")
     raise ValueError("FERNET_KEY environment variable is not set.")
-
-def get_roles():
-    """
-    Fetches all roles from FastAPI
-
-    Return:
-        - the list of roles (or nothing if the request fails)
-    """
-    try:
-        response = requests.get("http://127.0.0.1:8000/users/roles/")
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching role data: {e}")
-        return []
 
 # Getting data for user role
 roles = get_roles()
@@ -66,4 +54,5 @@ if st.button("Submit"):
         st.write(f"{result['response_message']}")
         st.switch_page("pages/patient_list.py") # Rerouting to the patients list
     else:
+        logging.error(f"Error {response.status_code}, {response.text}")
         st.write(f"Error: {response.status_code}, {response.text}")

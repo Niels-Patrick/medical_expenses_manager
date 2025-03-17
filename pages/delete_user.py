@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import logging
     
 # Initializing session state to track form visibility
 if "edit_form_visible" not in st.session_state:
@@ -38,6 +39,7 @@ if st.session_state.edit_form_visible:
                     st.write(f"{result['response_message']}")
                     st.switch_page("pages/patient_list.py") # Rerouting to the patients list page
                 else:
+                    logging.error(f"Error {response.status_code}, {response.text}")
                     st.write(f"Error: {response.status_code}, {response.text}")
                 
                 confirmation.empty()
