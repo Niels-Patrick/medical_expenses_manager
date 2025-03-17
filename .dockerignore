@@ -1,0 +1,36 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore virtual environments
+venv/
+*.venv
+
+# Ignore local config files
+.idea/
+.vscode/
+*.log
+
+# Ignore git-related files
+.git/
+.gitignore
+
+# Ignore Docker-related files (optional)
+.dockerignore
+Dockerfile
+
+# Ignore useless files
+/data/app_user.csv
+/data/db_management.py
+/data/eda.ipynb
+/data/faker_data.py
+/data/frais_medicaux.ipynb
+/data/insurance_encriched.csv
+/data/insurance.csv
+/data/sql_requests.py

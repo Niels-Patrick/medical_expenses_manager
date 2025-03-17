@@ -53,7 +53,6 @@ async def charges_prediction(request: Request):
 
     Parameters:
         - item: the patient's data received from a form
-        - db: the current database session
 
     Return:
         - a JSON response message displaying the predicted charges
