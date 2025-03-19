@@ -13,8 +13,12 @@ try:
 except Exception:
     print("Error during user dataset loading.")
 
-conn = sqlite3.connect("data/db_insurance.db", detect_types=sqlite3.PARSE_DECLTYPES) # Creating database if not exist
-cursor = conn.cursor() # Creating a cursor
+# Creating database if not exist
+conn = sqlite3.connect(
+    "data/db_insurance.db",
+    detect_types=sqlite3.PARSE_DECLTYPES
+)
+cursor = conn.cursor()  # Creating a cursor
 
 
 def db_tables_creation():
@@ -48,7 +52,12 @@ def create_df_unique(df_input, col_list, id_pk):
     return df_output
 
 
-def create_df_foreign(df_main, df_foreign_list, col_list, id_pk, merge_col_list):
+def create_df_foreign(
+        df_main,
+        df_foreign_list,
+        col_list, id_pk,
+        merge_col_list
+    ):
     """
     Creating a dataframe corresponding to a specific table WITH FKs.
 
@@ -65,7 +74,11 @@ def create_df_foreign(df_main, df_foreign_list, col_list, id_pk, merge_col_list)
     df_output = df_main.copy()
 
     for i, merge_col in enumerate(merge_col_list):
-        df_output = df_output.merge(df_foreign_list[i], on=merge_col, how="left")
+        df_output = df_output.merge(
+            df_foreign_list[i],
+            on=merge_col, 
+            ow="left"
+        )
 
     df_output = df_output[col_list]
     df_output.insert(0, id_pk, range(0, len(df_output)))
@@ -113,14 +126,36 @@ df_region = create_df_unique(df_insurance, ["region"], "id_region")
 df_role = create_df_unique(df_app_user, ["role_name"], "id_role")
 
 # Creating the dataframe corresponding to the patient table
-patient_col_list = ["last_name", "first_name", "age", "bmi", "patient_email", "children", "charges", "id_smoker", "id_sex", "id_region"]
+patient_col_list = [
+    "last_name",
+    "first_name",
+    "age", "bmi",
+    "patient_email",
+    "children",
+    "charges",
+    "id_smoker",
+    "id_sex",
+    "id_region"
+    ]
 df_foreign_list = [df_smoker, df_sex, df_region]
 merge_col_list = ["smoker", "sex", "region"]
-df_patient = create_df_foreign(df_insurance, df_foreign_list, patient_col_list, "id_patient", merge_col_list)
+df_patient = create_df_foreign(
+    df_insurance,
+    df_foreign_list,
+    patient_col_list,
+    "id_patient",
+    merge_col_list
+)
 
 # Creating the dataframe corresponding to the app_user table
 app_user_col_list = ["username", "password", "user_email", "id_role"]
-df_user = create_df_foreign(df_app_user, [df_role], app_user_col_list, "id_user", ["role_name"])
+df_user = create_df_foreign(
+    df_app_user,
+    [df_role],
+    app_user_col_list,
+    "id_user",
+    ["role_name"]
+)
 
 # Renaming columns to adapt to columns names in some tables
 renaming_columns(df_smoker, ["smoker"], ["is_smoker"])

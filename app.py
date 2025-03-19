@@ -28,7 +28,8 @@ if st.button("Submit"):
             st.write(f"{result['response_message']}")
 
             if result['response_message'] == "User authenticated.":
-                st.switch_page("pages/patient_list.py") # Rerouting to the patients list
+                # Rerouting to the patients list
+                st.switch_page("pages/patient_list.py")
 
         else:
             logging.error(f"Error: {response.status_code}, {response.text}")
